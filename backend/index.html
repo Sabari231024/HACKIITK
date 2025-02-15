@@ -340,6 +340,11 @@
             cursor: pointer;
             z-index: 1001;
         }
+        .cyber-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen p-8">
@@ -368,6 +373,11 @@
             </div>
             <button id="uploadBtn" class="cyber-button mt-4 px-6 py-3 rounded-lg w-full text-blue-300 hover:text-white disabled:opacity-50" disabled>
                 PROCESS REPORT
+            </button>
+            <button id="chatButton" onclick="window.open('/chat_interface', '_blank')" 
+                    class="cyber-button mt-4 px-6 py-3 rounded-lg w-full text-blue-300 hover:text-white disabled:opacity-50"
+                    disabled>
+                CHAT WITH PDF
             </button>
         </div>
 
@@ -514,10 +524,12 @@
                     this.value = '';
                     document.getElementById('fileName').textContent = '';
                     document.getElementById('uploadBtn').disabled = true;
+                    document.getElementById('chatButton').disabled = true;
                     return;
                 }
                 document.getElementById('fileName').textContent = file.name;
                 document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('chatButton').disabled = true; 
             }
         });
 
@@ -552,6 +564,9 @@
                 document.getElementById('resultsSection').classList.remove('hidden');
                 document.getElementById('hashAnalysisCard').classList.remove('hidden');
                 
+                // Enable the chat button after successful processing
+                document.getElementById('chatButton').disabled = false;
+
                 // Select IoCs by default and update display
                 document.querySelector('.intel-type[value="iocs"]').checked = true;
                 await updateJsonDisplay();

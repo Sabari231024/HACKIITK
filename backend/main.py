@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, jsonify, send_from_directory, session
 import os
 from werkzeug.utils import secure_filename
@@ -9,6 +8,7 @@ from hash_analysis import analyze_hashes
 from rag_pipeline import RAGPipeline
 from dotenv import load_dotenv
 load_dotenv()
+
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Required for session management
@@ -34,13 +34,14 @@ def process_pdf(filepath):
         threat_intelligence = extract_iocs_from_pdf(markdown_text)
         
         # Run RAG pipeline
+        global rag_pipeline
         rag_pipeline = RAGPipeline()
         rag_pipeline.create_documents(documents) 
         additional_intel = rag_pipeline.generate_threat_intelligence()
         
         # Combine results
         threat_intelligence.extend(additional_intel)
-        
+
         return threat_intelligence
     except Exception as e:
         raise Exception(f"Error processing PDF: {str(e)}")
@@ -170,5 +171,27 @@ def serve_image(filename):
     """Serve images from the image folder"""
     return send_from_directory(app.config['IMAGE_FOLDER'], filename)
 
+@app.route('/chat_interface')
+def chat_interface():
+    """Render the chat interface."""
+    return render_template('chat.html')
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Process chat messages and return responses."""
+    try:
+            
+        message = request.json.get('message')
+        if not message:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Process the message and get response
+        response = rag_pipeline.chat(message)
+        
+        return jsonify({'response': response})
+        
+    except Exception as e:
+        return jsonify({'error': f'Error processing message: {str(e)}'}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

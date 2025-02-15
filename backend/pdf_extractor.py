@@ -1,7 +1,6 @@
 import pymupdf4llm
 from langchain.text_splitter import MarkdownTextSplitter
 from langchain_core.documents import Document
-from unstructured.chunking.title import chunk_by_title
 
 def extract_markdown_from_pdf(pdf_path):
     md_text = pymupdf4llm.to_markdown(
@@ -17,7 +16,6 @@ def extract_markdown_from_pdf(pdf_path):
 def convert_markdown_to_documents(md_text):
     splitter = MarkdownTextSplitter(chunk_size=500, chunk_overlap=100, keep_separator=True)
     split_docs = splitter.create_documents([md_text])
-    hi = chunk_by_title
     documents = [
         Document(page_content=doc.page_content)
         for doc in split_docs
